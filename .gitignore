@@ -1,0 +1,6 @@
+*.zip
+Machine_Learning*
+__pychache__
+catboost_info
+Tarea machine learning*
+*.csv

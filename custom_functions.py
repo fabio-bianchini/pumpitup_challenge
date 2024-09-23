@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 def describe_numerical(df):
   #select numerical columns
@@ -152,19 +155,36 @@ def distribution_checker (data, xlabel):
   return(pivot)
 
 
+def confusion_matrix_plotter (y_test, y_pred):
+  fig, ax = plt.subplots(figsize=(8,5)) 
+  data = confusion_matrix(y_test, y_pred)
+  df_cm = pd.DataFrame(data, columns=np.unique(y_test), index = np.unique(y_test))
+  ax = sns.heatmap(df_cm, cmap='Blues', fmt='g' ,annot=True,annot_kws={"size": 14})
+  ax.set_xlabel("Predicho")
+  ax.set_ylabel ("Real")
+  ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+  ax.set_yticklabels(ax.get_xticklabels(), rotation=0)
+  plt.show()
 
 
+def feature_importances (X_train, model, title, importances_array = None):
+  features = X_train.columns
+  importances = importances_array if importances_array is not None else np.round(model.feature_importances_, 3)
+  indices = np.argsort(importances)
+  num_features = len(features)
+  fig, ax = plt.subplots(figsize=(10,8)) 
+  plt.barh(range(num_features), importances[indices[-num_features:]],  align='center', color =  '#66c2a5')
+  plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
+  plt.xlabel('Importancia Relativa')
+  plt.title('Importancia de cada variable' + title)
+  plt.show()
 
-#replace string to integer
-data['public_meeting'] = data['public_meeting'].replace({True: 1, False: 0})
-data['imputed_permit'] = data['imputed_permit'].replace({True: 1, False: 0})
 
-
-#change to integer
-data[['imputed_gps_height', 'construction_year_imputed', 'imputed_population']] = data[['imputed_gps_height', 'construction_year_imputed', 'imputed_population']].astype('int')
-
-#change type to categorical
-data[['num_private', 'region_code', 'district_code', 'num_private']] = data[[ 'num_private', 'region_code', 'district_code', 'num_private']].astype('str')
-
-#remove decimal
-data['district_code'] = data['district_code'].str.split(".").str[0]
+def decode_list(list, values):
+  return_list = [
+    values[0] if x == 0 else
+    values[1] if x == 1 else
+    values[2] if x == 2 else x
+    for x in list
+  ]
+  return return_list
